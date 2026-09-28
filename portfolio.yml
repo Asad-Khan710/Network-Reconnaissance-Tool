@@ -1,0 +1,25 @@
+title: Network Reconnaissance Tool
+
+description: >
+  Python-based tool for performing basic network reconnaissance
+  and collecting information about hosts and services.
+
+difficulty: easy
+
+tags:
+  - Python
+  - Networking
+  - Reconnaissance
+
+tools:
+  - Python
+  - Networking
+
+approach: >
+  Built a Python tool to perform basic reconnaissance and organize
+  information gathered from network targets.
+
+learnings: >
+  Learned more about network reconnaissance, Python programming,
+  and how security tools can be used to collect and organize
+  information about networked systems.
