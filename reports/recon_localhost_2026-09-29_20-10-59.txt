@@ -1,0 +1,23 @@
+NETWORK RECONNAISSANCE REPORT
+========================================
+
+Target: localhost
+Date: 2026-09-29 20:10:59
+
+SCAN SUMMARY
+----------------------------------------
+Open TCP ports: 2
+
+OPEN PORTS
+----------------------------------------
+
+Port:    135/tcp
+State:   open
+Service: msrpc
+Version: Microsoft Windows RPC
+----------------------------------------
+Port:    445/tcp
+State:   open
+Service: microsoft-ds?
+Version: Unknown
+----------------------------------------
