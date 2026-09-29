@@ -1,5 +1,6 @@
 import subprocess
 import os
+import socket
 from datetime import datetime
 
 
@@ -8,6 +9,15 @@ def scan_target(target):
     print("[+] Service detection enabled")
     print("[+] Running Nmap scan...\n")
 
+    # Resolve the target to an IP address
+    try:
+        ip_address = socket.gethostbyname(target)
+        print(f"[+] IP address: {ip_address}\n")
+    except socket.gaierror:
+        print("[!] Could not resolve target.")
+        return
+
+    # Run Nmap
     try:
         result = subprocess.run(
             ["nmap", "-sV", target],
@@ -26,9 +36,12 @@ def scan_target(target):
         return
 
     open_ports = []
+    operating_system = "Unknown"
 
+    # Read Nmap output
     for line in result.stdout.splitlines():
 
+        # Find open TCP ports
         if "/tcp" in line and "open" in line:
 
             parts = line.split()
@@ -49,13 +62,34 @@ def scan_target(target):
                 "version": version
             })
 
-    display_results(open_ports)
-    save_report(target, open_ports)
+        # Find operating system information
+        if "Service Info:" in line:
+
+            if "OS:" in line:
+                os_part = line.split("OS:", 1)[1]
+
+                if "," in os_part:
+                    operating_system = os_part.split(",")[0].strip()
+                else:
+                    operating_system = os_part.strip()
+
+    display_results(open_ports, operating_system)
+
+    save_report(
+        target,
+        ip_address,
+        operating_system,
+        open_ports
+    )
 
 
-def display_results(open_ports):
+def display_results(open_ports, operating_system):
 
-    print("Open Ports:")
+    print("Operating System:")
+    print("-" * 50)
+    print(operating_system)
+
+    print("\nOpen Ports:")
     print("-" * 50)
 
     if len(open_ports) == 0:
@@ -71,8 +105,14 @@ def display_results(open_ports):
         print("-" * 50)
 
 
-def save_report(target, open_ports):
+def save_report(
+    target,
+    ip_address,
+    operating_system,
+    open_ports
+):
 
+    # Create reports folder if it does not exist
     os.makedirs("reports", exist_ok=True)
 
     current_time = datetime.now()
@@ -100,6 +140,14 @@ def save_report(target, open_ports):
 
         report.write(
             f"Target: {target}\n"
+        )
+
+        report.write(
+            f"IP Address: {ip_address}\n"
+        )
+
+        report.write(
+            f"Operating System: {operating_system}\n"
         )
 
         report.write(
@@ -178,4 +226,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
