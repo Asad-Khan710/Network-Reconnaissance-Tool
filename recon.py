@@ -1,6 +1,7 @@
 import subprocess
 import os
 import socket
+import json
 from datetime import datetime
 
 
@@ -27,7 +28,87 @@ def choose_scan_mode():
         return None, None
 
 
-def scan_target(target, scan_command, scan_mode):
+def choose_port_scan():
+    print("\nPORT SCAN OPTIONS")
+    print("=" * 30)
+    print("1. Default ports")
+    print("2. Common ports")
+    print("3. Custom port")
+    print("4. Port range")
+
+    choice = input("\nEnter your choice (1-4): ")
+
+    if choice == "1":
+        return [], "Default ports"
+
+    elif choice == "2":
+        return ["--top-ports", "20"], "Top 20 ports"
+
+    elif choice == "3":
+
+        port = input("\nEnter port number (example: 443): ")
+
+        if not port.isdigit():
+            print("[!] Port must be a number.")
+            return None, None
+
+        port_number = int(port)
+
+        if port_number < 1 or port_number > 65535:
+            print("[!] Port must be between 1 and 65535.")
+            return None, None
+
+        return ["-p", port], f"Port {port}"
+
+    elif choice == "4":
+
+        port_range = input(
+            "\nEnter port range (example: 1-100): "
+        )
+
+        if "-" not in port_range:
+            print("[!] Range must use the format: start-end")
+            return None, None
+
+        parts = port_range.split("-")
+
+        if len(parts) != 2:
+            print("[!] Invalid port range.")
+            return None, None
+
+        start = parts[0]
+        end = parts[1]
+
+        if not start.isdigit() or not end.isdigit():
+            print("[!] Ports must be numbers.")
+            return None, None
+
+        start_port = int(start)
+        end_port = int(end)
+
+        if start_port < 1 or end_port > 65535:
+            print("[!] Ports must be between 1 and 65535.")
+            return None, None
+
+        if start_port > end_port:
+            print("[!] Starting port cannot be greater than ending port.")
+            return None, None
+
+        return ["-p", port_range], f"Ports {port_range}"
+
+    else:
+        print("[!] Invalid choice.")
+        return None, None
+
+
+def scan_target(
+    target,
+    scan_command,
+    scan_mode,
+    port_command,
+    port_scan_mode
+):
+
     print("\n[+] Starting reconnaissance...")
 
     if scan_mode == "Basic scan":
@@ -40,6 +121,7 @@ def scan_target(target, scan_command, scan_mode):
         print("[+] Operating system detection enabled")
         print("[+] Service and version detection enabled")
 
+    print(f"[+] Port selection: {port_scan_mode}")
     print("[+] Running Nmap scan...\n")
 
     # Resolve the target to an IP address
@@ -51,8 +133,8 @@ def scan_target(target, scan_command, scan_mode):
         print("[!] Could not resolve target.")
         return
 
-    # Add the target to the Nmap command
-    command = scan_command + [target]
+    # Build the Nmap command
+    command = scan_command + port_command + [target]
 
     # Run Nmap
     try:
@@ -117,7 +199,6 @@ def scan_target(target, scan_command, scan_mode):
                 "Running:", 1
             )[1].strip()
 
-            # Only use this if OS details was not already found
             if operating_system == "Unknown":
                 operating_system = running_os
 
@@ -140,9 +221,12 @@ def scan_target(target, scan_command, scan_mode):
                 operating_system = os_part.strip()
 
     display_results(
+        target,
+        ip_address,
         open_ports,
         operating_system,
-        scan_mode
+        scan_mode,
+        port_scan_mode
     )
 
     save_report(
@@ -150,24 +234,34 @@ def scan_target(target, scan_command, scan_mode):
         ip_address,
         operating_system,
         open_ports,
-        scan_mode
+        scan_mode,
+        port_scan_mode
     )
 
 
 def display_results(
+    target,
+    ip_address,
     open_ports,
     operating_system,
-    scan_mode
+    scan_mode,
+    port_scan_mode
 ):
 
-    print("SCAN RESULTS")
-    print("=" * 50)
+    print("\n")
+    print("=" * 60)
+    print("                 SCAN RESULTS")
+    print("=" * 60)
 
-    print(f"Scan Mode: {scan_mode}")
-    print(f"Operating System: {operating_system}")
+    print(f"Target:             {target}")
+    print(f"IP Address:         {ip_address}")
+    print(f"Operating System:   {operating_system}")
+    print(f"Scan Mode:          {scan_mode}")
+    print(f"Port Selection:     {port_scan_mode}")
+    print(f"Open TCP Ports:     {len(open_ports)}")
 
-    print("\nOpen Ports:")
-    print("-" * 50)
+    print("\nOPEN PORTS")
+    print("=" * 60)
 
     if len(open_ports) == 0:
         print("No open TCP ports found.")
@@ -175,11 +269,14 @@ def display_results(
 
     for item in open_ports:
 
-        print(f"Port:    {item['port']}")
-        print(f"State:   {item['state']}")
-        print(f"Service: {item['service']}")
-        print(f"Version: {item['version']}")
-        print("-" * 50)
+        print(
+            f"{item['port']:<10}"
+            f"{item['state']:<8}"
+            f"{item['service']:<18}"
+            f"{item['version']}"
+        )
+
+    print("=" * 60)
 
 
 def save_report(
@@ -187,7 +284,8 @@ def save_report(
     ip_address,
     operating_system,
     open_ports,
-    scan_mode
+    scan_mode,
+    port_scan_mode
 ):
 
     # Create reports folder if it does not exist
@@ -199,14 +297,15 @@ def save_report(
         "%Y-%m-%d_%H-%M-%S"
     )
 
-    filename = f"recon_{target}_{timestamp}.txt"
+    # Create TXT report
+    txt_filename = f"recon_{target}_{timestamp}.txt"
 
-    filepath = os.path.join(
+    txt_filepath = os.path.join(
         "reports",
-        filename
+        txt_filename
     )
 
-    with open(filepath, "w") as report:
+    with open(txt_filepath, "w") as report:
 
         report.write(
             "NETWORK RECONNAISSANCE REPORT\n"
@@ -226,6 +325,10 @@ def save_report(
 
         report.write(
             f"Scan Mode: {scan_mode}\n"
+        )
+
+        report.write(
+            f"Port Selection: {port_scan_mode}\n"
         )
 
         report.write(
@@ -286,7 +389,37 @@ def save_report(
                     "-" * 40 + "\n"
                 )
 
-    print(f"\n[✓] Report saved to: {filepath}")
+    # Create JSON report
+    json_filename = f"recon_{target}_{timestamp}.json"
+
+    json_filepath = os.path.join(
+        "reports",
+        json_filename
+    )
+
+    report_data = {
+        "target": target,
+        "ip_address": ip_address,
+        "scan_mode": scan_mode,
+        "port_selection": port_scan_mode,
+        "operating_system": operating_system,
+        "date": current_time.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+        "open_port_count": len(open_ports),
+        "open_ports": open_ports
+    }
+
+    with open(json_filepath, "w") as report:
+
+        json.dump(
+            report_data,
+            report,
+            indent=4
+        )
+
+    print(f"\n[✓] TXT report saved to: {txt_filepath}")
+    print(f"[✓] JSON report saved to: {json_filepath}")
 
 
 def main():
@@ -310,10 +443,17 @@ def main():
     if scan_command is None:
         return
 
+    port_command, port_scan_mode = choose_port_scan()
+
+    if port_command is None:
+        return
+
     scan_target(
         target,
         scan_command,
-        scan_mode
+        scan_mode,
+        port_command,
+        port_scan_mode
     )
 
 
