@@ -238,6 +238,15 @@ def scan_target(
         port_scan_mode
     )
 
+    save_scan_history(
+        target,
+        ip_address,
+        operating_system,
+        open_ports,
+        scan_mode,
+        port_scan_mode
+    )
+
 
 def display_results(
     target,
@@ -265,6 +274,7 @@ def display_results(
 
     if len(open_ports) == 0:
         print("No open TCP ports found.")
+        print("=" * 60)
         return
 
     for item in open_ports:
@@ -422,11 +432,134 @@ def save_report(
     print(f"[✓] JSON report saved to: {json_filepath}")
 
 
+def save_scan_history(
+    target,
+    ip_address,
+    operating_system,
+    open_ports,
+    scan_mode,
+    port_scan_mode
+):
+
+    history_file = "scan_history.json"
+
+    current_time = datetime.now()
+
+    history_entry = {
+        "target": target,
+        "ip_address": ip_address,
+        "scan_mode": scan_mode,
+        "port_selection": port_scan_mode,
+        "operating_system": operating_system,
+        "date": current_time.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+        "open_port_count": len(open_ports)
+    }
+
+    # Load existing history
+    if os.path.exists(history_file):
+
+        try:
+
+            with open(history_file, "r") as file:
+                history = json.load(file)
+
+        except json.JSONDecodeError:
+
+            history = []
+
+    else:
+
+        history = []
+
+    # Add the newest scan
+    history.append(history_entry)
+
+    # Save updated history
+    with open(history_file, "w") as file:
+
+        json.dump(
+            history,
+            file,
+            indent=4
+        )
+
+    print(f"[✓] Scan added to history: {history_file}")
+
+
+def view_scan_history():
+
+    history_file = "scan_history.json"
+
+    print("\n")
+    print("=" * 60)
+    print("                    SCAN HISTORY")
+    print("=" * 60)
+
+    # Check if history exists
+    if not os.path.exists(history_file):
+
+        print("No scan history found.")
+        print("=" * 60)
+        return
+
+    try:
+
+        with open(history_file, "r") as file:
+            history = json.load(file)
+
+    except json.JSONDecodeError:
+
+        print("[!] Scan history file is invalid.")
+        print("=" * 60)
+        return
+
+    if len(history) == 0:
+
+        print("No scan history found.")
+        print("=" * 60)
+        return
+
+    # Display scans
+    for number, scan in enumerate(history, start=1):
+
+        print(f"\nScan #{number}")
+        print("-" * 60)
+
+        print(f"Target:             {scan['target']}")
+        print(f"IP Address:         {scan['ip_address']}")
+        print(f"Scan Mode:          {scan['scan_mode']}")
+        print(f"Port Selection:     {scan['port_selection']}")
+        print(f"Operating System:   {scan['operating_system']}")
+        print(f"Date:               {scan['date']}")
+        print(f"Open TCP Ports:     {scan['open_port_count']}")
+
+    print("\n" + "=" * 60)
+
+
 def main():
 
     print("================================")
     print("      NETWORK RECON TOOL")
     print("================================")
+
+    print("\nMAIN MENU")
+    print("=" * 30)
+    print("1. Start new scan")
+    print("2. View scan history")
+
+    choice = input("\nEnter your choice (1-2): ")
+
+    if choice == "2":
+
+        view_scan_history()
+        return
+
+    if choice != "1":
+
+        print("[!] Invalid choice.")
+        return
 
     target = input(
         "\nEnter target IP or hostname: "
