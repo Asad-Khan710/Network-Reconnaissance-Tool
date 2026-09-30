@@ -1,0 +1,41 @@
+NETWORK RECONNAISSANCE REPORT
+========================================
+
+Target: localhost
+IP Address: 127.0.0.1
+Scan Mode: Basic scan
+Port Selection: Default ports
+Operating System: Unknown
+Date: 2026-09-30 19:16:48
+
+SCAN SUMMARY
+----------------------------------------
+Open TCP ports: 2
+
+OPEN PORTS
+----------------------------------------
+
+Port:    135/tcp
+State:   open
+Service: msrpc
+Version: Unknown
+----------------------------------------
+Port:    445/tcp
+State:   open
+Service: microsoft-ds
+Version: Unknown
+----------------------------------------
+
+SECURITY FINDINGS
+----------------------------------------
+
+Severity: MEDIUM
+Port:     135/tcp
+Service:  Microsoft RPC
+Finding:  Microsoft RPC service detected. Verify that RPC access is restricted to trusted networks and unnecessary exposure is avoided.
+----------------------------------------
+Severity: MEDIUM
+Port:     445/tcp
+Service:  SMB
+Finding:  SMB service detected. Verify that SMB is restricted to trusted networks and securely configured.
+----------------------------------------

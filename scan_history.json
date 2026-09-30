@@ -7,5 +7,47 @@
         "operating_system": "Windows",
         "date": "2026-09-30 13:47:46",
         "open_port_count": 2
+    },
+    {
+        "target": "localhost",
+        "ip_address": "127.0.0.1",
+        "scan_mode": "OS detection",
+        "port_selection": "Default ports",
+        "operating_system": "Windows",
+        "date": "2026-09-30 13:50:51",
+        "open_port_count": 2
+    },
+    {
+        "target": "localhost",
+        "ip_address": "127.0.0.1",
+        "scan_mode": "Basic scan",
+        "port_selection": "Default ports",
+        "operating_system": "Unknown",
+        "date": "2026-09-30 19:16:48",
+        "open_port_count": 2,
+        "security_findings": [
+            {
+                "port": "135/tcp",
+                "service": "Microsoft RPC",
+                "severity": "MEDIUM",
+                "message": "Microsoft RPC service detected. Verify that RPC access is restricted to trusted networks and unnecessary exposure is avoided."
+            },
+            {
+                "port": "445/tcp",
+                "service": "SMB",
+                "severity": "MEDIUM",
+                "message": "SMB service detected. Verify that SMB is restricted to trusted networks and securely configured."
+            }
+        ]
+    },
+    {
+        "target": "localhost",
+        "ip_address": "127.0.0.1",
+        "scan_mode": "OS detection",
+        "port_selection": "Port 9999",
+        "operating_system": "Microsoft Windows Server 2008 R2, Microsoft Windows Server 2008 R2 SP1, Microsoft Windows Server 2008 SP2 Datacenter Version, Microsoft Windows 7, Microsoft Windows 8.1 Update 1, Microsoft Windows Vista, Microsoft Windows Vista SP2, Novell NetWare 6",
+        "date": "2026-09-30 19:19:04",
+        "open_port_count": 0,
+        "security_findings": []
     }
 ]

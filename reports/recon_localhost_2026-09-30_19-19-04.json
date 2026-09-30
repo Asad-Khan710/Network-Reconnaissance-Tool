@@ -1,0 +1,11 @@
+{
+    "target": "localhost",
+    "ip_address": "127.0.0.1",
+    "scan_mode": "OS detection",
+    "port_selection": "Port 9999",
+    "operating_system": "Microsoft Windows Server 2008 R2, Microsoft Windows Server 2008 R2 SP1, Microsoft Windows Server 2008 SP2 Datacenter Version, Microsoft Windows 7, Microsoft Windows 8.1 Update 1, Microsoft Windows Vista, Microsoft Windows Vista SP2, Novell NetWare 6",
+    "date": "2026-09-30 19:19:04",
+    "open_port_count": 0,
+    "open_ports": [],
+    "security_findings": []
+}

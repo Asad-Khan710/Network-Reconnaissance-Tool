@@ -1,0 +1,37 @@
+{
+    "target": "localhost",
+    "ip_address": "127.0.0.1",
+    "scan_mode": "Basic scan",
+    "port_selection": "Default ports",
+    "operating_system": "Unknown",
+    "date": "2026-09-30 19:16:48",
+    "open_port_count": 2,
+    "open_ports": [
+        {
+            "port": "135/tcp",
+            "state": "open",
+            "service": "msrpc",
+            "version": "Unknown"
+        },
+        {
+            "port": "445/tcp",
+            "state": "open",
+            "service": "microsoft-ds",
+            "version": "Unknown"
+        }
+    ],
+    "security_findings": [
+        {
+            "port": "135/tcp",
+            "service": "Microsoft RPC",
+            "severity": "MEDIUM",
+            "message": "Microsoft RPC service detected. Verify that RPC access is restricted to trusted networks and unnecessary exposure is avoided."
+        },
+        {
+            "port": "445/tcp",
+            "service": "SMB",
+            "severity": "MEDIUM",
+            "message": "SMB service detected. Verify that SMB is restricted to trusted networks and securely configured."
+        }
+    ]
+}
