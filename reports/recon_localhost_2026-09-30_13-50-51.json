@@ -1,0 +1,30 @@
+{
+    "target": "localhost",
+    "ip_address": "127.0.0.1",
+    "scan_mode": "OS detection",
+    "port_selection": "Default ports",
+    "operating_system": "Windows",
+    "date": "2026-09-30 13:50:51",
+    "open_port_count": 2,
+    "open_ports": [
+        {
+            "port": "135/tcp",
+            "state": "open",
+            "service": "msrpc",
+            "version": "Microsoft Windows RPC"
+        },
+        {
+            "port": "445/tcp",
+            "state": "open",
+            "service": "microsoft-ds?",
+            "version": "Unknown"
+        }
+    ],
+    "security_findings": [
+        {
+            "port": "445/tcp",
+            "service": "SMB",
+            "message": "SMB service detected. Verify that SMB is restricted to trusted networks and securely configured."
+        }
+    ]
+}

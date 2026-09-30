@@ -1,0 +1,23 @@
+{
+    "target": "localhost",
+    "ip_address": "127.0.0.1",
+    "scan_mode": "OS detection",
+    "port_selection": "Top 20 ports",
+    "operating_system": "Windows",
+    "date": "2026-09-30 13:47:46",
+    "open_port_count": 2,
+    "open_ports": [
+        {
+            "port": "135/tcp",
+            "state": "open",
+            "service": "msrpc",
+            "version": "Microsoft Windows RPC"
+        },
+        {
+            "port": "445/tcp",
+            "state": "open",
+            "service": "microsoft-ds?",
+            "version": "Unknown"
+        }
+    ]
+}

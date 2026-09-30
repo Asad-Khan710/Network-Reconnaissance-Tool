@@ -101,6 +101,114 @@ def choose_port_scan():
         return None, None
 
 
+def analyze_open_ports(open_ports):
+
+    findings = []
+
+    # Security-relevant services
+    service_information = {
+        "21": {
+            "service": "FTP",
+            "message": "FTP service detected. FTP may transmit credentials without encryption."
+        },
+
+        "22": {
+            "service": "SSH",
+            "message": "SSH service detected. Verify that strong authentication and secure configuration are used."
+        },
+
+        "23": {
+            "service": "Telnet",
+            "message": "Telnet service detected. Telnet transmits data without encryption and should generally be avoided."
+        },
+
+        "25": {
+            "service": "SMTP",
+            "message": "SMTP service detected. Verify mail-server configuration and authentication controls."
+        },
+
+        "53": {
+            "service": "DNS",
+            "message": "DNS service detected. Verify that the DNS service is securely configured."
+        },
+
+        "80": {
+            "service": "HTTP",
+            "message": "HTTP service detected. Web traffic may be unencrypted unless redirected to HTTPS."
+        },
+
+        "110": {
+            "service": "POP3",
+            "message": "POP3 service detected. Verify that encrypted mail access is enabled."
+        },
+
+        "143": {
+            "service": "IMAP",
+            "message": "IMAP service detected. Verify that encrypted mail access is enabled."
+        },
+
+        "443": {
+            "service": "HTTPS",
+            "message": "HTTPS service detected. Verify that TLS is properly configured."
+        },
+
+        "445": {
+            "service": "SMB",
+            "message": "SMB service detected. Verify that SMB is restricted to trusted networks and securely configured."
+        },
+
+        "3389": {
+            "service": "RDP",
+            "message": "RDP service detected. Verify strong authentication, access restrictions, and secure configuration."
+        }
+    }
+
+    for item in open_ports:
+
+        port_number = item["port"].split("/")[0]
+
+        if port_number in service_information:
+
+            information = service_information[port_number]
+
+            findings.append({
+                "port": item["port"],
+                "service": information["service"],
+                "message": information["message"]
+            })
+
+    return findings
+
+
+def display_security_findings(findings):
+
+    print("\nSECURITY FINDINGS")
+    print("=" * 60)
+
+    if len(findings) == 0:
+
+        print("No predefined security-relevant services detected.")
+
+        print("=" * 60)
+        return
+
+    for finding in findings:
+
+        print(
+            f"[!] {finding['port']} - "
+            f"{finding['service']}"
+        )
+
+        print(
+            f"    {finding['message']}"
+        )
+
+        print()
+
+
+    print("=" * 60)
+
+
 def scan_target(
     target,
     scan_command,
@@ -220,6 +328,9 @@ def scan_target(
 
                 operating_system = os_part.strip()
 
+    # Analyze the open ports
+    security_findings = analyze_open_ports(open_ports)
+
     display_results(
         target,
         ip_address,
@@ -229,13 +340,18 @@ def scan_target(
         port_scan_mode
     )
 
+    display_security_findings(
+        security_findings
+    )
+
     save_report(
         target,
         ip_address,
         operating_system,
         open_ports,
         scan_mode,
-        port_scan_mode
+        port_scan_mode,
+        security_findings
     )
 
     save_scan_history(
@@ -273,6 +389,7 @@ def display_results(
     print("=" * 60)
 
     if len(open_ports) == 0:
+
         print("No open TCP ports found.")
         print("=" * 60)
         return
@@ -295,7 +412,8 @@ def save_report(
     operating_system,
     open_ports,
     scan_mode,
-    port_scan_mode
+    port_scan_mode,
+    security_findings
 ):
 
     # Create reports folder if it does not exist
@@ -399,6 +517,42 @@ def save_report(
                     "-" * 40 + "\n"
                 )
 
+        report.write("\n")
+
+        report.write(
+            "SECURITY FINDINGS\n"
+        )
+
+        report.write(
+            "-" * 40 + "\n\n"
+        )
+
+        if len(security_findings) == 0:
+
+            report.write(
+                "No predefined security-relevant services detected.\n"
+            )
+
+        else:
+
+            for finding in security_findings:
+
+                report.write(
+                    f"Port:    {finding['port']}\n"
+                )
+
+                report.write(
+                    f"Service: {finding['service']}\n"
+                )
+
+                report.write(
+                    f"Finding: {finding['message']}\n"
+                )
+
+                report.write(
+                    "-" * 40 + "\n"
+                )
+
     # Create JSON report
     json_filename = f"recon_{target}_{timestamp}.json"
 
@@ -417,7 +571,8 @@ def save_report(
             "%Y-%m-%d %H:%M:%S"
         ),
         "open_port_count": len(open_ports),
-        "open_ports": open_ports
+        "open_ports": open_ports,
+        "security_findings": security_findings
     }
 
     with open(json_filepath, "w") as report:
@@ -485,7 +640,9 @@ def save_scan_history(
             indent=4
         )
 
-    print(f"[✓] Scan added to history: {history_file}")
+    print(
+        f"[✓] Scan added to history: {history_file}"
+    )
 
 
 def view_scan_history():
